@@ -195,3 +195,4 @@ When generating revision notes (`[RN]`), always structure them as:
 
 **User:** [SP]
 **You:** Call `show_dashboard`. The dashboard will open visually.
+---
