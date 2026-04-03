@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Xara University Tutor — Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-gradient: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+      --glass-bg: rgba(255, 255, 255, 0.05);
+      --glass-border: rgba(255, 255, 255, 0.1);
+      --text-main: #ffffff;
+      --text-dim: rgba(255, 255, 255, 0.6);
+      --accent-primary: #4ecca3;
+      --accent-secondary: #45b7d1;
+      --accent-warn: #f4a261;
+      --accent-danger: #e76f51;
+      --card-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Outfit', sans-serif; }
+
+    body {
+      background: var(--bg-gradient);
+      background-attachment: fixed;
+      color: var(--text-main);
+      min-height: 100vh;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow-x: hidden;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 500px;
+      animation: fadeIn 0.6s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      font-weight: 600;
+      background: linear-gradient(to right, #4ecca3, #45b7d1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subtitle {
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      margin-top: 4px;
+    }
+
+    /* --- Section card --- */
+    .card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: var(--card-shadow);
+    }
+
+    .card-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--accent-secondary);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* --- Course progress cards (horizontal scroll) --- */
+    .courses-scroll {
+      display: flex;
+      gap: 12px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .courses-scroll::-webkit-scrollbar { display: none; }
+
+    .course-chip {
+      min-width: 130px;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      padding: 14px 12px;
+      flex-shrink: 0;
+      transition: border-color 0.2s;
+    }
+
+    .course-chip.active-course {
+      border-color: var(--accent-primary);
+    }
+
+    .course-code {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--accent-primary);
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+
+    .course-name {
+      font-size: 0.8rem;
+      color: var(--text-main);
+      margin-bottom: 10px;
+      line-height: 1.3;
+    }
+
+    .progress-bar-bg {
+      background: rgba(255,255,255,0.1);
+      border-radius: 6px;
+      height: 6px;
+      overflow: hidden;
+      margin-bottom: 4px;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      border-radius: 6px;
+      transition: width 0.5s ease;
+    }
+
+    .progress-pct {
+      font-size: 0.72rem;
+      color: var(--text-dim);
+    }
+
+    /* --- Quiz history list --- */
+    .quiz-list { list-style: none; }
+
+    .quiz-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 11px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      animation: slideIn 0.4s ease-out;
+    }
+
+    .quiz-item:last-child { border-bottom: none; }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(-8px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+
+    .quiz-score-pill {
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 12px;
+      min-width: 42px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    .quiz-topic {
+      flex: 1;
+      font-size: 0.88rem;
+      color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .quiz-meta {
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      flex-shrink: 0;
+    }
+
+    /* --- Weak areas --- */
+    .weak-list { list-style: none; }
+
+    .weak-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .weak-item:last-child { border-bottom: none; }
+
+    .weak-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-danger);
+      margin-top: 5px;
+      flex-shrink: 0;
+    }
+
+    .weak-info { flex: 1; }
+
+    .weak-topic {
+      font-size: 0.88rem;
+      color: var(--text-main);
+    }
+
+    .weak-course {
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      margin-top: 2px;
+    }
+
+    .weak-score {
+      font-size: 0.8rem;
+      color: var(--accent-danger);
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    /* --- Empty states --- */
+    .empty-state {
+      text-align: center;
+      padding: 24px 16px;
+      color: var(--text-dim);
+      font-size: 0.88rem;
+      line-height: 1.6;
+    }
+
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--glass-border); border-radius: 8px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Xara Tutor</h1>
+      <div class="subtitle" id="subtitle">Loading your progress...</div>
+    </header>
+
+    <!-- Course Progress -->
+    <div class="card">
+      <div class="card-title">
+        <span>📚</span> Course Progress
+      </div>
+      <div class="courses-scroll" id="courses-scroll">
+        <div class="empty-state">Loading courses...</div>
+      </div>
+    </div>
+
+    <!-- Recent Quizzes -->
+    <div class="card">
+      <div class="card-title">
+        <span>📝</span> Recent Quizzes
+      </div>
+      <ul class="quiz-list" id="quiz-list">
+        <div class="empty-state">No quizzes yet. Try [GQ] to generate one.</div>
+      </ul>
+    </div>
+
+    <!-- Weak Areas -->
+    <div class="card" id="weak-card">
+      <div class="card-title">
+        <span>⚠️</span> Focus Areas
+      </div>
+      <ul class="weak-list" id="weak-list">
+        <div class="empty-state">No weak areas detected yet.</div>
+      </ul>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'xara_tutor_v1';
+
+    // Topic counts per course (from knowledge-map.md frontmatter)
+    const TOPIC_COUNTS = {
+      'artificial-intelligence': 13,
+      'data-communication-and-networks': 24,
+      'operating-systems': 7,
+      'programming-languages': 5,
+      'compiler-construction': 8,
+      'system-analysis-and-design': 9
+    };
+
+    const COURSE_LABELS = {
+      'artificial-intelligence': { code: 'CMS707', name: 'Artificial Intelligence' },
+      'data-communication-and-networks': { code: 'CMS703', name: 'Data Comms & Networks' },
+      'operating-systems': { code: 'CMS701', name: 'Operating Systems' },
+      'programming-languages': { code: 'CMS705', name: 'Programming Languages' },
+      'compiler-construction': { code: 'CMS709', name: 'Compiler Construction' },
+      'system-analysis-and-design': { code: 'CMS711', name: 'System Analysis & Design' }
+    };
+
+    const params = new URLSearchParams(window.location.search);
+    const filterCourse = params.get('course') || null;
+
+    function getStore() {
+      try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); }
+      catch (e) { return {}; }
+    }
+
+    function scoreColor(pct) {
+      if (pct >= 80) return '#4ecca3';
+      if (pct >= 60) return '#f4a261';
+      return '#e76f51';
+    }
+
+    function progressColor(completedPct) {
+      if (completedPct >= 75) return '#4ecca3';
+      if (completedPct >= 25) return '#f4a261';
+      return '#45b7d1';
+    }
+
+    function renderCourses(store) {
+      const progress = store.progress || {};
+      const activeCourse = store.activeCourse || null;
+      const scroll = document.getElementById('courses-scroll');
+      const courses = filterCourse ? [filterCourse] : Object.keys(TOPIC_COUNTS);
+
+      if (courses.length === 0) {
+        scroll.innerHTML = '<div class="empty-state">No courses available.</div>';
+        return;
+      }
+
+      scroll.innerHTML = '';
+      for (const slug of courses) {
+        const topics = progress[slug] || {};
+        const total = TOPIC_COUNTS[slug] || 1;
+        const completed = Object.values(topics).filter(t => t.status === 'complete').length;
+        const pct = Math.round((completed / total) * 100);
+        const label = COURSE_LABELS[slug] || { code: slug.toUpperCase(), name: slug };
+
+        const chip = document.createElement('div');
+        chip.className = 'course-chip' + (slug === activeCourse ? ' active-course' : '');
+        chip.innerHTML = `
+          <div class="course-code">${label.code}</div>
+          <div class="course-name">${label.name}</div>
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" style="width:${pct}%; background:${progressColor(pct)}"></div>
+          </div>
+          <div class="progress-pct">${completed}/${total} topics${pct > 0 ? ' · ' + pct + '%' : ''}</div>
+        `;
+        scroll.appendChild(chip);
+      }
+    }
+
+    function renderQuizzes(store) {
+      const quizHistory = store.quizHistory || {};
+      const list = document.getElementById('quiz-list');
+
+      // Flatten and sort newest first
+      const allQuizzes = [];
+      const courses = filterCourse ? [filterCourse] : Object.keys(quizHistory);
+      for (const c of courses) {
+        for (const entry of (quizHistory[c] || [])) {
+          allQuizzes.push({ ...entry, course: c });
+        }
+      }
+      allQuizzes.sort((a, b) => b.date.localeCompare(a.date));
+
+      const recent = allQuizzes.slice(0, 6);
+      if (recent.length === 0) {
+        list.innerHTML = '<div class="empty-state">No quizzes yet. Try [GQ] to generate one.</div>';
+        return;
+      }
+
+      list.innerHTML = '';
+      for (const q of recent) {
+        const pct = Math.round((q.score || 0) * 100);
+        const label = COURSE_LABELS[q.course] || { code: q.course };
+        const li = document.createElement('li');
+        li.className = 'quiz-item';
+        li.innerHTML = `
+          <div class="quiz-score-pill" style="background:${scoreColor(pct)};color:#1a1a2e">${pct}%</div>
+          <div class="quiz-topic">${q.topic}</div>
+          <div class="quiz-meta">${label.code} · ${q.difficulty || ''}</div>
+        `;
+        list.appendChild(li);
+      }
+    }
+
+    function renderWeakAreas(store) {
+      const quizHistory = store.quizHistory || {};
+      const list = document.getElementById('weak-list');
+
+      const weak = [];
+      const courses = filterCourse ? [filterCourse] : Object.keys(quizHistory);
+      for (const c of courses) {
+        const entries = quizHistory[c] || [];
+        // Group by topic, check if most recent attempt < 60%
+        const byTopic = {};
+        for (const e of entries) {
+          if (!byTopic[e.topic]) byTopic[e.topic] = [];
+          byTopic[e.topic].push(e);
+        }
+        for (const [topic, attempts] of Object.entries(byTopic)) {
+          const latest = attempts[0]; // already newest-first
+          if (latest.score < 0.6) {
+            weak.push({ topic, course: c, score: latest.score, date: latest.date });
+          }
+        }
+      }
+
+      if (weak.length === 0) {
+        list.innerHTML = '<div class="empty-state">No weak areas detected. Keep it up!</div>';
+        return;
+      }
+
+      list.innerHTML = '';
+      weak.slice(0, 6).forEach(w => {
+        const pct = Math.round(w.score * 100);
+        const label = COURSE_LABELS[w.course] || { code: w.course };
+        const li = document.createElement('li');
+        li.className = 'weak-item';
+        li.innerHTML = `
+          <div class="weak-dot"></div>
+          <div class="weak-info">
+            <div class="weak-topic">${w.topic}</div>
+            <div class="weak-course">${label.code} · last attempt ${w.date}</div>
+          </div>
+          <div class="weak-score">${pct}%</div>
+        `;
+        list.appendChild(li);
+      });
+    }
+
+    function updateSubtitle(store) {
+      const sub = document.getElementById('subtitle');
+      const progress = store.progress || {};
+      const allTopics = Object.values(progress).flatMap(c => Object.values(c));
+      const completed = allTopics.filter(t => t.status === 'complete').length;
+      const total = allTopics.length;
+      const quizCount = Object.values(store.quizHistory || {}).reduce((n, arr) => n + arr.length, 0);
+
+      if (total === 0) {
+        sub.textContent = 'Start studying to track your progress.';
+      } else {
+        sub.textContent = `${completed}/${total} topics studied · ${quizCount} quiz${quizCount !== 1 ? 'zes' : ''} taken`;
+      }
+    }
+
+    function loadDashboard() {
+      const store = getStore();
+      updateSubtitle(store);
+      renderCourses(store);
+      renderQuizzes(store);
+      renderWeakAreas(store);
+    }
+
+    loadDashboard();
+  </script>
+</body>
+</html>
