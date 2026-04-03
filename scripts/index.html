@@ -5,7 +5,6 @@
     const STORAGE_KEY = 'xara_tutor_v1';
     const MAX_CHARS = 12000;
 
-    // Course slugs — static list matching the bundled courses/ folder
     const COURSE_SLUGS = [
       'artificial-intelligence',
       'data-communication-and-networks',
@@ -15,7 +14,7 @@
       'system-analysis-and-design'
     ];
 
-    // Fetch course files from GitHub raw content (local fetch is blocked in the sandboxed WebView)
+    // Full GitHub raw URL — external fetch works in the sandboxed logic WebView
     const COURSES_PATH = 'https://raw.githubusercontent.com/Mbosinwa/xara-university-tutor/main/assets/courses';
 
     // --- Storage helpers ---
@@ -37,8 +36,6 @@
     }
 
     // --- Section extractor ---
-    // Extracts the block of text under the first heading matching `keyword`.
-    // Stops at the next heading of the same or higher level (fewer # chars).
     function extractSection(text, keyword, maxChars) {
       const lines = text.split('\n');
       const kw = keyword.toLowerCase();
@@ -74,31 +71,27 @@
       return content;
     }
 
-    // --- Actions ---
+    // --- Actions (return plain Objects, not JSON strings) ---
 
-    async function listCourses() {
-      const results = await Promise.all(COURSE_SLUGS.map(async (slug) => {
-        try {
-          const resp = await fetch(`${COURSES_PATH}/${slug}/course-structure.md`);
-          if (!resp.ok) return `- ${slug}: [unavailable]`;
-          const text = await resp.text();
-          const code = (text.match(/courseCode:\s*(.+)/) || [])[1]?.trim() ?? slug.toUpperCase();
-          const name = (text.match(/courseName:\s*(.+)/) || [])[1]?.trim() ?? slug;
-          const count = (text.match(/materialsCount:\s*(\d+)/) || [])[1] ?? '?';
-          return `- ${code} — ${name} (${count} materials)`;
-        } catch (e) {
-          return `- ${slug}: [error: ${e.message}]`;
-        }
-      }));
-
+    function listCourses() {
+      // Hardcoded for instant response — no network calls needed
       const store = getStore();
       const active = store.activeCourse
         ? `\n\nCurrently active: **${store.activeCourse}**`
         : '';
 
-      return JSON.stringify({
-        result: `Your enrolled courses:\n\n${results.join('\n')}${active}\n\nType **[LT]** to learn a topic, **[KM]** for a knowledge map, **[GQ]** to take a quiz, or **[TP]** to see your progress.`
-      });
+      return {
+        result:
+          `Your enrolled courses:\n\n` +
+          `1. CMS707 — Artificial Intelligence\n` +
+          `2. CMS701 — Operating Systems\n` +
+          `3. CMS703 — Data Communications & Networks\n` +
+          `4. CMS705 — Programming Languages\n` +
+          `5. CMS709 — Compiler Construction\n` +
+          `6. CMS711 — System Analysis & Design` +
+          active +
+          `\n\nType **[LT]** to learn a topic, **[KM]** for a knowledge map, **[GQ]** to take a quiz, or **[TP]** to see your progress.`
+      };
     }
 
     async function loadCourse(course) {
@@ -108,7 +101,7 @@
       const store = getStore();
       store.activeCourse = course;
       saveStore(store);
-      return JSON.stringify({ result: text });
+      return { result: text };
     }
 
     async function loadKnowledgeMap(course) {
@@ -118,7 +111,7 @@
       const truncated = text.length > MAX_CHARS
         ? text.substring(0, MAX_CHARS) + '\n\n...[KNOWLEDGE MAP TRUNCATED — ask about a specific section]'
         : text;
-      return JSON.stringify({ result: truncated });
+      return { result: truncated };
     }
 
     async function loadMaterial(course, filename, section) {
@@ -127,13 +120,13 @@
       const text = await resp.text();
 
       if (section) {
-        return JSON.stringify({ result: extractSection(text, section, MAX_CHARS) });
+        return { result: extractSection(text, section, MAX_CHARS) };
       }
 
       const truncated = text.length > MAX_CHARS
         ? text.substring(0, MAX_CHARS) + `\n\n...[FILE TRUNCATED at ${MAX_CHARS} chars — use a section parameter to load a specific topic]`
         : text;
-      return JSON.stringify({ result: truncated });
+      return { result: truncated };
     }
 
     function saveProgress(course, topic, status, notes) {
@@ -151,15 +144,14 @@
       store.activeCourse = course;
       saveStore(store);
 
-      return JSON.stringify({
+      return {
         result: `Progress saved: **${topic}** marked as **${status || 'in-progress'}** (session ${store.progress[course][topic].sessionCount}).`
-      });
+      };
     }
 
     function getProgress(course) {
       const store = getStore();
       const progress = store.progress || {};
-
       const courses = course ? [course] : COURSE_SLUGS;
       const lines = [];
 
@@ -176,7 +168,6 @@
         }
       }
 
-      // Weak areas from quiz history
       const quizHistory = store.quizHistory || {};
       const weakAreas = [];
       for (const c of courses) {
@@ -191,11 +182,11 @@
         lines.push(`\n**Areas needing review (score < 60%):**\n${weakAreas.slice(0, 5).join('\n')}`);
       }
 
-      return JSON.stringify({
+      return {
         result: lines.length > 0
           ? lines.join('\n')
           : 'No progress recorded yet. Start a learning session with **[LT]**.'
-      });
+      };
     }
 
     function logQuiz(course, topic, score, difficulty, questionCount) {
@@ -212,57 +203,49 @@
       };
 
       store.quizHistory[course].unshift(entry);
-      // Cap at 50 entries per course
       if (store.quizHistory[course].length > 50) {
         store.quizHistory[course] = store.quizHistory[course].slice(0, 50);
       }
       saveStore(store);
 
       const pct = Math.round(parseFloat(score) * 100);
-      const feedback = pct >= 80 ? 'Excellent work!' : pct >= 60 ? 'Good effort — review the weak spots.' : 'Keep studying — you\'ll get there!';
-      return JSON.stringify({
+      const feedback = pct >= 80 ? 'Excellent work!' : pct >= 60 ? 'Good effort — review the weak spots.' : "Keep studying — you'll get there!";
+      return {
         result: `Quiz logged: **${pct}%** on **${topic}** (${difficulty}, ${questionCount} questions). ${feedback}`
-      });
+      };
     }
 
     function showDashboard(course) {
       const url = course
         ? `dashboard.html?course=${encodeURIComponent(course)}`
         : 'dashboard.html';
-
-      return JSON.stringify({
+      return {
         result: 'Opening your progress dashboard.',
         webview: { url, aspectRatio: 1.6 }
-      });
+      };
     }
 
     // --- Main dispatcher ---
-    window['ai_edge_gallery_get_result'] = async (dataStr) => {
+    // Entry point expected by the Edge Gallery runtime
+    window.run_js_action = async (input) => {
       try {
-        const input = JSON.parse(dataStr);
-        switch (input.action) {
-          case 'list_courses':
-            return await listCourses();
-          case 'load_course':
-            return await loadCourse(input.course);
-          case 'load_knowledge_map':
-            return await loadKnowledgeMap(input.course);
-          case 'load_material':
-            return await loadMaterial(input.course, input.filename, input.section);
-          case 'save_progress':
-            return saveProgress(input.course, input.topic, input.status, input.notes);
-          case 'get_progress':
-            return getProgress(input.course);
-          case 'log_quiz':
-            return logQuiz(input.course, input.topic, input.score, input.difficulty, input.question_count);
-          case 'show_dashboard':
-            return showDashboard(input.course);
-          default:
-            throw new Error(`Unknown action: ${input.action}`);
+        // Handle input as either a pre-parsed Object or a raw JSON string
+        const data = (typeof input === 'string') ? JSON.parse(input) : input;
+
+        switch (data.action) {
+          case 'list_courses':    return listCourses();
+          case 'load_course':     return await loadCourse(data.course);
+          case 'load_knowledge_map': return await loadKnowledgeMap(data.course);
+          case 'load_material':   return await loadMaterial(data.course, data.filename, data.section);
+          case 'save_progress':   return saveProgress(data.course, data.topic, data.status, data.notes);
+          case 'get_progress':    return getProgress(data.course);
+          case 'log_quiz':        return logQuiz(data.course, data.topic, data.score, data.difficulty, data.question_count);
+          case 'show_dashboard':  return showDashboard(data.course);
+          default:                throw new Error(`Unknown action: ${data.action}`);
         }
       } catch (e) {
         console.error(e);
-        return JSON.stringify({ error: `Xara Tutor error: ${e.message}` });
+        return { error: `Xara Tutor error: ${e.message}` };
       }
     };
   </script>

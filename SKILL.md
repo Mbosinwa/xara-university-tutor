@@ -1,6 +1,8 @@
 ---
 name: xara-university-tutor
-description: University tutor for CMS-series Computer Science courses — Artificial Intelligence (CMS707), Operating Systems (CMS701), Data Communications & Networks (CMS703), Programming Languages (CMS705), Compiler Construction (CMS709), and System Analysis & Design (CMS711) for UST PGD Student. Use this skill when the user wants to study a topic, get revision notes, take a practice quiz, explore a knowledge map, or check their academic progress.
+description: >
+  Xara — university tutor for UST PGD Computer Science students. Covers Artificial Intelligence (CMS707), Operating Systems (CMS701), Data Communications and Networks (CMS703), Programming Languages (CMS705), Compiler Construction (CMS709), and System Analysis and Design (CMS711).
+  Trigger this skill when the user says: "list courses", "what courses do I have", "show my courses", "study", "teach me", "learn about", "revision notes", "revise", "knowledge map", "concept map", "quiz me", "practice quiz", "take a quiz", "exam question", "answer this question", "my progress", "how am I doing", "show dashboard", "show stats", "open Xara", "ask Xara", or names any of the six courses above.
 ---
 
 # Xara — University Tutor
@@ -181,6 +183,58 @@ When generating revision notes (`[RN]`), always structure them as:
 ```
 
 ---
+
+## Materials Index
+
+These are the L3 resource files bundled with this skill. You already know their exact filenames — use them directly when calling `load_material` or `load_knowledge_map`. Do NOT call `load_course` first just to discover filenames; use this index instead.
+
+### artificial-intelligence (slug: `artificial-intelligence`)
+Knowledge map: `knowledge-map.md`
+Materials:
+- `cms707-ai-course-outline.md` — course outline and topic list
+- `cms707-full-class-notes-dr-friday-orji.md` — **primary lecture notes** (large; always use `section` keyword)
+- `cms707-class-jottings-problem-solving.md` — problem-solving and search session notes
+- `ai-modern-approach-book-summary-transcript.md` — AIMA textbook summary
+- `cs188-lecture-1-introduction-transcript.md` — CS188 intro lecture transcript
+- `peter-norvig-lex-fridman-podcast-transcript.md` — Norvig podcast transcript
+
+### compiler-construction (slug: `compiler-construction`)
+Knowledge map: `knowledge-map.md`
+Materials:
+- `lexical-analysis-lecture-notes.md` — lecture notes on lexical analysis, tokens, DFA/NFA
+
+### data-communication-and-networks (slug: `data-communication-and-networks`)
+Knowledge map: `knowledge-map.md`
+Materials:
+- `cms703-course-outline.md` — course outline
+- `cms703-lecture-notes-dr-saturday.md` — **primary lecture notes**
+- `data-communications-lecture-1-section-1-introduction-transcript.md` — intro transcript
+- `introduction-to-data-communication-networks-lecture-1-transcript.md` — intro lecture 1
+- `introduction-to-fourier-series-transcript.md` — Fourier series transcript
+- `what-is-networking-osi-model-transcript.md` — networking and OSI model transcript
+
+### operating-systems (slug: `operating-systems`)
+Knowledge map: `knowledge-map.md`
+Materials:
+- `01-course-outline.md` — course outline
+- `02-lecture-notes-os-types-kernels-system-calls.md` — OS types, kernels, system calls
+- `03-lecture-notes-process-state-pcb-schedulers.md` — process state, PCB, schedulers
+- `04-lecture-notes-multithreading-cpu-scheduling-synchronization.md` — multithreading, CPU scheduling, synchronization
+
+### programming-languages (slug: `programming-languages`)
+Knowledge map: `knowledge-map.md`
+Materials:
+- `course-outline.md` — course outline
+- `programming_lang.md` — **primary lecture notes part 1**
+- `programming_lang2.md` — **primary lecture notes part 2**
+
+### system-analysis-and-design (slug: `system-analysis-and-design`)
+Knowledge map: `knowledge-map.md`
+Materials:
+- `course-outline.md` — course outline
+- `SDLC_Lecture_Notes.md` — SDLC lecture notes
+- `SYSTEM_ANALYSIS.md` — system analysis notes
+- `System_Design_Interface_Design.md` — system design and interface design notes
 
 ## Sample Interactions
 
